@@ -35,6 +35,7 @@ declare module "./load.cjs" {
       resizable?: boolean;
       alwaysOnTop?: boolean;
       skipTaskbar?: boolean;
+      show?: boolean;
       title?: string;
     }
   ): Promise<number>;
@@ -56,6 +57,11 @@ declare module "./load.cjs" {
   function osrWindowSetCursor(windowPtr: number, cursorName: string): void;
   function osrWindowDrag(windowPtr: number): void;
   function osrWindowClose(windowPtr: number): void;
+  function osrWindowShow(windowPtr: number): void;
+  function osrWindowHide(windowPtr: number): void;
+  function osrWindowSetAlwaysOnTop(windowPtr: number, onTop: boolean): void;
+  function osrWindowSetBounds(windowPtr: number, x: number, y: number, width: number, height: number): void;
+  function osrWindowFocus(windowPtr: number): void;
   function destroyOsrWindow(windowPtr: number): void;
 }
 

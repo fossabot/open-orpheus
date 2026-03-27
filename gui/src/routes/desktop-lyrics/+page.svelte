@@ -7,7 +7,7 @@
 <div
   role="button"
   tabindex="0"
-  class="flex cursor-grab flex-col items-center gap-4 rounded p-4 hover:bg-black/40"
+  class="w-screen h-screen flex cursor-grab flex-col items-center gap-4 rounded p-4 hover:bg-black/40"
   onmousedown={(e) => {
     e.preventDefault();
     desktopLyrics.dragWindow();

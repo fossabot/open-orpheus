@@ -4,9 +4,14 @@ import {
   destroyOsrWindow,
   osrWindowClose,
   osrWindowDrag,
+  osrWindowFocus,
+  osrWindowHide,
   osrWindowResize,
+  osrWindowSetAlwaysOnTop,
+  osrWindowSetBounds,
   osrWindowSetCursor,
   osrWindowSetInputHandler,
+  osrWindowShow,
   osrWindowUpdateFrame,
 } from "./module.cjs";
 
@@ -17,6 +22,7 @@ export interface OsrWindowOptions {
   resizable?: boolean;
   alwaysOnTop?: boolean;
   skipTaskbar?: boolean;
+  show?: boolean;
   title?: string;
 }
 
@@ -114,5 +120,40 @@ export default class OsrWindow {
    */
   close(): void {
     osrWindowClose(this._ptr);
+  }
+
+  /**
+   * Show the native window.
+   */
+  show(): void {
+    osrWindowShow(this._ptr);
+  }
+
+  /**
+   * Hide the native window.
+   */
+  hide(): void {
+    osrWindowHide(this._ptr);
+  }
+
+  /**
+   * Set or clear the always-on-top (topmost) flag.
+   */
+  setAlwaysOnTop(onTop: boolean): void {
+    osrWindowSetAlwaysOnTop(this._ptr, onTop);
+  }
+
+  /**
+   * Move and resize the native window (logical coordinates).
+   */
+  setBounds(x: number, y: number, width: number, height: number): void {
+    osrWindowSetBounds(this._ptr, x, y, width, height);
+  }
+
+  /**
+   * Give keyboard focus to the native window.
+   */
+  focus(): void {
+    osrWindowFocus(this._ptr);
   }
 }

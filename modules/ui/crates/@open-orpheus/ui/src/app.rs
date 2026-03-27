@@ -221,6 +221,46 @@ impl App {
             .send_event(Request::DragWindow(window));
     }
 
+    /// Show the native window.
+    pub fn show_window(&self, window: WindowId) {
+        let _ = self
+            .event_loop_proxy
+            .send_event(Request::ShowWindow(window));
+    }
+
+    /// Hide the native window.
+    pub fn hide_window(&self, window: WindowId) {
+        let _ = self
+            .event_loop_proxy
+            .send_event(Request::HideWindow(window));
+    }
+
+    /// Set or clear the always-on-top (topmost) flag for a window.
+    pub fn set_always_on_top(&self, window: WindowId, on_top: bool) {
+        let _ = self
+            .event_loop_proxy
+            .send_event(Request::SetAlwaysOnTop(window, on_top));
+    }
+
+    /// Move and resize a window in one operation (logical coordinates).
+    pub fn set_window_bounds(
+        &self,
+        window: WindowId,
+        position: winit::dpi::LogicalPosition<f64>,
+        size: winit::dpi::LogicalSize<f64>,
+    ) {
+        let _ = self
+            .event_loop_proxy
+            .send_event(Request::SetWindowBounds(window, position, size));
+    }
+
+    /// Give keyboard focus to a window.
+    pub fn focus_window(&self, window: WindowId) {
+        let _ = self
+            .event_loop_proxy
+            .send_event(Request::FocusWindow(window));
+    }
+
     pub async fn set_window_message_handler(
         &self,
         window: WindowId,

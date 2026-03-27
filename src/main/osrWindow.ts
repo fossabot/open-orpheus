@@ -32,6 +32,8 @@ export interface OsrBrowserWindowOptions {
   skipTaskbar?: boolean;
   /** Allow the native window to be resized by the user. */
   resizable?: boolean;
+  /** Whether the native window is initially visible (default: true). */
+  show?: boolean;
   /** Additional web preferences for BrowserWindow. */
   webPreferences?: Electron.WebPreferences;
 }
@@ -43,6 +45,16 @@ export interface OsrBrowserWindowHandle {
   browserWindow: BrowserWindow;
   /** Tear down both windows and stop the paint bridge. */
   destroy(): void;
+  /** Show the native window. */
+  show(): void;
+  /** Hide the native window. */
+  hide(): void;
+  /** Set or clear the always-on-top (topmost) flag on the native window. */
+  setAlwaysOnTop(onTop: boolean): void;
+  /** Move and resize the native window (logical coordinates). */
+  setBounds(x: number, y: number, width: number, height: number): void;
+  /** Give keyboard focus to the native window. */
+  focus(): void;
 }
 
 /**
@@ -63,6 +75,7 @@ export async function createOsrBrowserWindow(
     alwaysOnTop = false,
     skipTaskbar = false,
     resizable = false,
+    show = true,
     webPreferences = {},
   } = options;
 
@@ -89,6 +102,7 @@ export async function createOsrBrowserWindow(
     alwaysOnTop,
     skipTaskbar,
     resizable,
+    show,
     title,
   });
 
@@ -117,6 +131,21 @@ export async function createOsrBrowserWindow(
       if (!browserWindow.isDestroyed()) {
         browserWindow.destroy();
       }
+    },
+    show() {
+      osrWindow.show();
+    },
+    hide() {
+      osrWindow.hide();
+    },
+    setAlwaysOnTop(onTop: boolean) {
+      osrWindow.setAlwaysOnTop(onTop);
+    },
+    setBounds(x: number, y: number, width: number, height: number) {
+      osrWindow.setBounds(x, y, width, height);
+    },
+    focus() {
+      osrWindow.focus();
     },
   };
 }

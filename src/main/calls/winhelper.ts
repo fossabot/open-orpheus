@@ -11,6 +11,7 @@ import { getWindowScaleFactor, pngFromIco } from "../util";
 import { getMenus, getWindowById, setMaximumSize } from "../window";
 import { AppMenuItem } from "../menu";
 import { getApp } from "../ui";
+import { getDesktopLyricsHandle } from "../desktopLyrics";
 
 function shouldApplyScaleFactor() {
   // TODO: Confirm macOS desired behavior, Windows and Linux is already tested to be correct
@@ -164,6 +165,18 @@ registerCallHandler<
   void
 >("winhelper.setNativeWindowShow", (event, id, show, rect) => {
   if (!id) return;
+  if (id === "desktop_lyrics") {
+    // Desktop lyrics is a special window
+    const handle = getDesktopLyricsHandle();
+    if (show) {
+      handle.setBounds(rect.x, rect.y, rect.width, rect.height);
+      handle.show();
+      handle.focus();
+    } else {
+      handle.hide();
+    }
+    return;
+  }
   const wnd = getWindowById(id);
   if (!wnd) return;
   if (show) {

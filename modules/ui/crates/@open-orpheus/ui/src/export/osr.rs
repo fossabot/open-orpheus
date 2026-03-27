@@ -109,6 +109,41 @@ fn osr_window_close(window_ptr: f64) {
     window.close();
 }
 
+/// Shows the native window.
+#[neon::export]
+fn osr_window_show(window_ptr: f64) {
+    let window = unsafe { &*(window_ptr as usize as *const OsrWindow) };
+    window.show();
+}
+
+/// Hides the native window.
+#[neon::export]
+fn osr_window_hide(window_ptr: f64) {
+    let window = unsafe { &*(window_ptr as usize as *const OsrWindow) };
+    window.hide();
+}
+
+/// Sets or clears the always-on-top (topmost) flag on the native window.
+#[neon::export]
+fn osr_window_set_always_on_top(window_ptr: f64, on_top: bool) {
+    let window = unsafe { &*(window_ptr as usize as *const OsrWindow) };
+    window.set_always_on_top(on_top);
+}
+
+/// Moves and resizes the native window in one logical coordinate operation.
+#[neon::export]
+fn osr_window_set_bounds(window_ptr: f64, x: f64, y: f64, width: f64, height: f64) {
+    let window = unsafe { &*(window_ptr as usize as *const OsrWindow) };
+    window.set_bounds(x, y, width, height);
+}
+
+/// Gives keyboard focus to the native window.
+#[neon::export]
+fn osr_window_focus(window_ptr: f64) {
+    let window = unsafe { &*(window_ptr as usize as *const OsrWindow) };
+    window.focus();
+}
+
 /// Destroys the `OsrWindow`, releasing all associated resources.
 #[neon::export]
 fn destroy_osr_window(window_ptr: f64) {

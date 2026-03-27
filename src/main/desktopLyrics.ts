@@ -4,7 +4,6 @@ import {
   createOsrBrowserWindow,
   type OsrBrowserWindowHandle,
 } from "./osrWindow";
-import { setWindowId } from "./window";
 
 let handle: OsrBrowserWindowHandle | null = null;
 
@@ -16,6 +15,7 @@ export default async function createDesktopLyricsWindow() {
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: true,
+    show: false,
     webPreferences: {
       partition: "open-orpheus",
       preload: join(__dirname, "desktop-lyrics.js"),
@@ -33,8 +33,6 @@ export default async function createDesktopLyricsWindow() {
   });
 
   handle.browserWindow.webContents.openDevTools();
-
-  setWindowId(handle.browserWindow, "desktop_lyrics");
 }
 
 export function getDesktopLyricsHandle(): OsrBrowserWindowHandle | null {

@@ -1,6 +1,6 @@
 use egui::{ViewportBuilder, ViewportId};
 use winit::{
-    dpi::{LogicalSize, PhysicalPosition, PhysicalSize},
+    dpi::{LogicalPosition, LogicalSize, PhysicalPosition, PhysicalSize},
     window::{CursorIcon, WindowId},
 };
 
@@ -27,4 +27,9 @@ pub enum Request {
     ),
     GetWindowScaleFactor(WindowId, oneshot::Sender<Option<f64>>),
     SetWindowMessageHandler(WindowId, WindowMessageHandler),
+    ShowWindow(WindowId),
+    HideWindow(WindowId),
+    SetAlwaysOnTop(WindowId, bool),
+    SetWindowBounds(WindowId, LogicalPosition<f64>, LogicalSize<f64>),
+    FocusWindow(WindowId),
 }

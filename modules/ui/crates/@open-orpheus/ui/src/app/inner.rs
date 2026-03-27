@@ -7,7 +7,7 @@ use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
     event_loop::ActiveEventLoop,
-    window::{Window, WindowId},
+    window::{Window, WindowId, WindowLevel},
 };
 
 use crate::app::{
@@ -266,6 +266,37 @@ impl ApplicationHandler<Request> for AppInner {
                     })
                     .unwrap_or_default();
                 let _ = sender.send(rects);
+            }
+            Request::ShowWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_visible(true);
+                }
+            }
+            Request::HideWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_visible(false);
+                }
+            }
+            Request::SetAlwaysOnTop(window_id, on_top) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    let level = if on_top {
+                        WindowLevel::AlwaysOnTop
+                    } else {
+                        WindowLevel::Normal
+                    };
+                    ws.window.set_window_level(level);
+                }
+            }
+            Request::SetWindowBounds(window_id, position, size) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_outer_position(position);
+                    let _ = ws.window.request_inner_size(size);
+                }
+            }
+            Request::FocusWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.focus_window();
+                }
             }
         }
     }

@@ -57,6 +57,8 @@ pub struct OsrWindowOptions {
     pub always_on_top: bool,
     #[serde(default)]
     pub skip_taskbar: bool,
+    #[serde(default = "default_true")]
+    pub show: bool,
     #[serde(default)]
     pub title: Option<String>,
 }
@@ -153,6 +155,9 @@ impl OsrWindow {
 
         if options.always_on_top {
             builder = builder.with_always_on_top();
+        }
+        if !options.show {
+            builder = builder.with_visible(false);
         }
         if let Some(ref title) = options.title {
             builder = builder.with_title(title);
@@ -391,5 +396,39 @@ impl OsrWindow {
     pub fn close(&self) {
         let app = unsafe { &*self.app };
         smol::block_on(app.close_window(self.window_id));
+    }
+
+    /// Show the native window.
+    pub fn show(&self) {
+        let app = unsafe { &*self.app };
+        app.show_window(self.window_id);
+    }
+
+    /// Hide the native window.
+    pub fn hide(&self) {
+        let app = unsafe { &*self.app };
+        app.hide_window(self.window_id);
+    }
+
+    /// Set or clear the always-on-top (topmost) flag.
+    pub fn set_always_on_top(&self, on_top: bool) {
+        let app = unsafe { &*self.app };
+        app.set_always_on_top(self.window_id, on_top);
+    }
+
+    /// Move and resize the native window (logical coordinates).
+    pub fn set_bounds(&self, x: f64, y: f64, width: f64, height: f64) {
+        let app = unsafe { &*self.app };
+        app.set_window_bounds(
+            self.window_id,
+            winit::dpi::LogicalPosition::new(x, y),
+            LogicalSize::new(width, height),
+        );
+    }
+
+    /// Give keyboard focus to the native window.
+    pub fn focus(&self) {
+        let app = unsafe { &*self.app };
+        app.focus_window(self.window_id);
     }
 }
