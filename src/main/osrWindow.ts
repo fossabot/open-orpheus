@@ -219,6 +219,8 @@ function forwardInputEvent(bw: BrowserWindow, event: OsrInputEvent): void {
 
     case "resize":
       if (event.width != null && event.height != null) {
+        // Yea this doesn't work with Wayland, thus causing web content's `outerWidth` and `outerHeight` always be the initial ones.
+        // Brings scaled frame images, cannot be fixed rn.
         bw.setSize(event.width, event.height);
       }
       break;

@@ -2,25 +2,15 @@
 
 // Script for early-state development of the UI module.
 
-import { homedir, platform } from "node:os";
-import { resolve } from "node:path";
-
 import { App, Menu } from "@open-orpheus/ui";
 
-import WebPack from "../src/main/packs/WebPack.ts";
-import SkinPack from "../src/main/packs/SkinPack.ts";
+import { createOsrBrowserWindow } from "../src/main/osrWindow";
+import { createApp, getApp } from "../src/main/ui";
+import { loadSkinPack, loadWebPack, skinPack, webPack } from "../src/main/pack";
 
 setInterval(() => {
   // keep alive
 }, 1000);
-
-const userData = resolve(
-  homedir(),
-  platform() === "win32" ? "AppData/Roaming" : ".config",
-  "open-orpheus"
-);
-const webPack = new WebPack(resolve(userData, "package/orpheus.ntpk"));
-const skinPack = new SkinPack(resolve(userData, "package/common.skin"));
 
 // no GC
 let app: App | null = null;
@@ -35,20 +25,23 @@ function parseMenuData(menuData: any) {
 }
 
 async function main() {
+  await loadWebPack();
   await webPack.readPack();
+
+  await loadSkinPack("common");
   await skinPack.readPack();
 
-  app = await App.create({
-    preferWayland: false,
-    readWebPack: webPack.readFile.bind(webPack),
-    readSkinPack: skinPack.readFile.bind(skinPack),
+  await createApp();
+  await getApp().loadMenuSkin("/menu/skin.xml");
+
+  const wnd = await createOsrBrowserWindow({
+    width: 1000,
+    height: 400,
+    transparent: false,
   });
-
-  await app.loadMenuSkin("/menu/skin.xml");
-
-  //const menu = new Menu(app, parseMenuData(MENU_DATA));
-  menu = new Menu(app, parseMenuData(MENU_DATA_2));
-  menu.show();
+  wnd.browserWindow.loadFile("test.html");
+  wnd.browserWindow.webContents.openDevTools({ mode: "detach" });
+  wnd.setBounds(0, 0, 1000, 1000);
 }
 
 main();

@@ -125,6 +125,12 @@ struct OsrState {
     height: usize,
     /// RGBA pixel data waiting to be uploaded on the next redraw.
     pending_frame: Option<Vec<u8>>,
+    /// Actual native window size and scale factor, updated on resize events.
+    window_width: u32,
+    window_height: u32,
+    scale_factor: f64,
+    /// Input event callback, set by `set_input_handler`.
+    input_callback: Option<Arc<dyn Fn(OsrInputEvent) + Send + Sync>>,
 }
 
 // ── OsrWindow ────────────────────────────────────────────────────────────────
@@ -168,6 +174,10 @@ impl OsrWindow {
             width: options.width as usize,
             height: options.height as usize,
             pending_frame: None,
+            window_width: options.width as u32,
+            window_height: options.height as u32,
+            scale_factor: 1.0,
+            input_callback: None,
         }));
 
         let render_state = state.clone();
@@ -237,6 +247,17 @@ impl OsrWindow {
         st.width = width;
         st.height = height;
         st.pending_frame = Some(pixels.to_vec());
+
+        if (st.width != (st.window_width as f64 * st.scale_factor).round() as usize
+            || st.height != (st.window_height as f64 * st.scale_factor).round() as usize)
+            && let Some(ref cb) = st.input_callback {
+                cb(OsrInputEvent::Resize {
+                    width: st.window_width,
+                    height: st.window_height,
+                    scale_factor: st.scale_factor,
+                });
+            }
+
         drop(st);
 
         let app = unsafe { &*self.app };
@@ -249,13 +270,27 @@ impl OsrWindow {
     /// JSON-serialised [`OsrInputEvent`].  The callback fires on the winit
     /// event-loop thread; implementations should be non-blocking.
     pub fn set_input_handler(&self, callback: impl Fn(OsrInputEvent) + Send + Sync + 'static) {
+        let callback = Arc::new(callback);
+        {
+            let mut st = self.state.lock().unwrap();
+            st.input_callback = Some(callback.clone());
+        }
         let app = unsafe { &*self.app };
         let mut cursor: (f64, f64) = (0.0, 0.0);
+        let state = self.state.clone();
 
         smol::block_on(app.set_window_message_handler(
             self.window_id,
             move |_window_id, event, window| {
+                let size = window.inner_size();
                 let scale = window.scale_factor();
+
+                if let Ok(mut st) = state.lock()
+                    && (size.width != st.window_width || size.height != st.window_height || scale != st.scale_factor) {
+                        st.window_width = size.width;
+                        st.window_height = size.height;
+                        st.scale_factor = scale;
+                    }
 
                 let osr_event = match event {
                     WindowEvent::CursorMoved { position, .. } => {
@@ -306,11 +341,13 @@ impl OsrWindow {
                         y: cursor.1,
                     }),
                     WindowEvent::CursorLeft { .. } => Some(OsrInputEvent::MouseLeave),
-                    WindowEvent::Resized(size) => Some(OsrInputEvent::Resize {
-                        width: size.width,
-                        height: size.height,
-                        scale_factor: scale,
-                    }),
+                    WindowEvent::Resized(size) => {
+                        Some(OsrInputEvent::Resize {
+                            width: size.width,
+                            height: size.height,
+                            scale_factor: scale,
+                        })
+                    }
                     WindowEvent::Focused(true) => Some(OsrInputEvent::Focus),
                     WindowEvent::Focused(false) => Some(OsrInputEvent::Blur),
                     WindowEvent::CloseRequested => Some(OsrInputEvent::Close),
