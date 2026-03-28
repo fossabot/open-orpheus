@@ -276,11 +276,16 @@ pub fn layout_horizontal(
 
     for line in &mut visible_lines {
         let galley_width = line.galley.size().x;
-        let x = match line.align {
-            Align::Min => -line.scroll_offset,
-            Align::Center => ((available_size.x - galley_width) * 0.5 - line.scroll_offset)
-                .max(-(galley_width - available_size.x).max(0.0)),
-            Align::Max => available_size.x - galley_width - line.scroll_offset,
+        let overflow = galley_width - available_size.x;
+        // When text overflows, ignore alignment — start from the left and scroll right.
+        let x = if overflow > 0.0 {
+            -line.scroll_offset
+        } else {
+            match line.align {
+                Align::Min => 0.0,
+                Align::Center => (available_size.x - galley_width) * 0.5,
+                Align::Max => available_size.x - galley_width,
+            }
         };
         line.pos = Pos2::new(x, y);
         y += line.galley.size().y + line_spacing;
