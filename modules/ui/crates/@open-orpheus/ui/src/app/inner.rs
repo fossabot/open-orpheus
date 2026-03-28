@@ -7,7 +7,7 @@ use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
     event_loop::ActiveEventLoop,
-    window::{Window, WindowId},
+    window::{Window, WindowId, WindowLevel},
 };
 
 use crate::app::{
@@ -223,6 +223,21 @@ impl ApplicationHandler<Request> for AppInner {
                     smol::block_on(self.painter.set_window(ws.viewport_id, None)).ok();
                 }
             }
+            Request::SetWindowInnerSize(window_id, size) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    let _ = ws.window.request_inner_size(size);
+                }
+            }
+            Request::SetCursor(window_id, icon) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_cursor(winit::window::Cursor::Icon(icon));
+                }
+            }
+            Request::DragWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    let _ = ws.window.drag_window();
+                }
+            }
             Request::SetWindowMessageHandler(window_id, handler) => {
                 if let Some(window_state) = self.windows.get_mut(&window_id) {
                     window_state.message_handler = Some(handler);
@@ -251,6 +266,37 @@ impl ApplicationHandler<Request> for AppInner {
                     })
                     .unwrap_or_default();
                 let _ = sender.send(rects);
+            }
+            Request::ShowWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_visible(true);
+                }
+            }
+            Request::HideWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_visible(false);
+                }
+            }
+            Request::SetAlwaysOnTop(window_id, on_top) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    let level = if on_top {
+                        WindowLevel::AlwaysOnTop
+                    } else {
+                        WindowLevel::Normal
+                    };
+                    ws.window.set_window_level(level);
+                }
+            }
+            Request::SetWindowBounds(window_id, position, size) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.set_outer_position(position);
+                    let _ = ws.window.request_inner_size(size);
+                }
+            }
+            Request::FocusWindow(window_id) => {
+                if let Some(ws) = self.windows.get(&window_id) {
+                    ws.window.focus_window();
+                }
             }
         }
     }

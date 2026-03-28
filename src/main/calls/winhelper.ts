@@ -162,11 +162,12 @@ registerCallHandler<
     },
   ],
   void
->("winhelper.setNativeWindowShow", () => {
-  // Params:
-  // - id: string
-  // - show: boolean
-  // - rect
+>("winhelper.setNativeWindowShow", (event, id, show, rect) => {
+  if (!id) return;
+  if (id === "desktop_lyrics") {
+
+    return;
+  }
   return;
 });
 
