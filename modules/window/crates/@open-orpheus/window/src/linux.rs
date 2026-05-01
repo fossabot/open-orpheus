@@ -9,15 +9,15 @@ use neon::{
 };
 use std::sync::OnceLock;
 
-mod dynload;
+mod hook;
 mod wayland;
 mod x11;
 
-static DISABLE_WAYLAND_HOOKS: OnceLock<bool> = OnceLock::new();
+static DISABLE_DISPLAY_SERVER_HOOKS: OnceLock<bool> = OnceLock::new();
 
-fn disable_wayland_hooks() -> bool {
-    *DISABLE_WAYLAND_HOOKS.get_or_init(|| {
-        std::env::var("DISABLE_WAYLAND_HOOKS")
+fn disable_display_server_hooks() -> bool {
+    *DISABLE_DISPLAY_SERVER_HOOKS.get_or_init(|| {
+        std::env::var("DISABLE_DISPLAY_SERVER_HOOKS")
             .ok()
             .map(|v| {
                 let value = v.trim().to_ascii_lowercase();
@@ -27,9 +27,17 @@ fn disable_wayland_hooks() -> bool {
     })
 }
 
+// Both false -> we are not connecting to either display server,
+// so dragWindow will just fail gracefully
+
 #[neon::export]
 fn is_wayland() -> bool {
     wayland::is_wayland()
+}
+
+#[neon::export]
+fn is_x11() -> bool {
+    x11::is_x11()
 }
 
 #[neon::export]
@@ -57,11 +65,8 @@ fn drag_window<'cx>(cx: &mut Cx<'cx>, handle: Handle<JsBuffer>) -> NeonResult<()
         return cx.throw(err_msg);
     };
 
-    if let Err(err) = x11::send_net_wm_moveresize_move(window) {
-        let err_msg = cx.string(format!(
-            "Failed to send net wm moveresize move event: {}",
-            err
-        ));
+    if !x11::send_net_wm_moveresize_move(window as u32) {
+        let err_msg = cx.string("Failed to send net wm moveresize move event");
         return cx.throw(err_msg);
     }
 
@@ -73,7 +78,7 @@ fn capture_next_window_first_cursor_enter<'cx>(
     cx: &mut Cx<'cx>,
     callback: Handle<'cx, JsFunction>,
 ) -> NeonResult<()> {
-    if disable_wayland_hooks() {
+    if disable_display_server_hooks() {
         let err_msg = cx.string(
             "captureNextWindowFirstCursorEnter is unavailable when Wayland hooks are disabled",
         );
@@ -105,8 +110,8 @@ fn capture_next_window_first_cursor_enter<'cx>(
 fn main(mut cx: ModuleContext) -> NeonResult<()> {
     neon::registered().export(&mut cx)?;
 
-    if !disable_wayland_hooks() {
-        wayland::init_wayland_hook();
+    if !disable_display_server_hooks() {
+        hook::init_hooks();
     }
 
     Ok(())
@@ -114,8 +119,8 @@ fn main(mut cx: ModuleContext) -> NeonResult<()> {
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_unload() {
-    if !disable_wayland_hooks() {
-        wayland::remove_wayland_hook();
+    if !disable_display_server_hooks() {
+        hook::remove_hooks();
     }
 }
 
