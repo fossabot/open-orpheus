@@ -20,15 +20,24 @@ registerCallHandler<string[], void>("app.log", (_ev, ...args) => {
 });
 
 registerCallHandler<string[], void>("app.exit", (event, action, ...params) => {
+  let args = process.argv.slice(1); // Skip the first argument which is the executable path
+
+  const moverunIdx = args.indexOf("--moverun");
+  if (moverunIdx !== -1) {
+    // If --moverun is present, we need to drop it
+    args = args.slice(0, moverunIdx).concat(args.slice(moverunIdx + 3));
+  }
+
   if (action === "restart") {
-    app.relaunch();
+    app.relaunch({ args });
   } else if (action === "moverun") {
     const src = params[0];
     const dest = params[1];
     app.relaunch({
-      args: process.argv.slice(1).concat(["--moverun", src, dest]),
+      args: args.concat(["--moverun", src, dest]),
     });
   }
+
   app.quit();
 });
 
