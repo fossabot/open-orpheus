@@ -1,25 +1,15 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { ipcRenderer } from "electron";
 import { IPC, NIM_APP_KEY } from "../shared/listenTogetherConstants";
 import { dispatcher } from "./calls";
 
 // ===== Types =====
 
-type ConnectionState = "disconnected" | "connecting" | "connected";
-type ChatRoomState = "none" | "entering" | "entered";
 type YunxinPayload = Record<string, unknown>;
 type Callback = (data: YunxinPayload) => void;
-
-interface NimSignalingChannel {
-  channelId?: string;
-  channelName?: string;
-}
 
 interface NimInstance {
   on(event: string, handler: (...args: unknown[]) => void): void;
   destroy(opts: Record<string, unknown>): void;
-  signalingCreateAndJoin(opts: Record<string, unknown>): Promise<NimSignalingChannel>;
-  signalingGetChannelInfo(opts: Record<string, unknown>): Promise<NimSignalingChannel | null>;
-  signalingJoin(opts: Record<string, unknown>): Promise<NimSignalingChannel>;
   getChatroomAddress(opts: {
     chatroomId: string;
     done: (err: unknown, data: { address?: string[] }) => void;
@@ -49,16 +39,12 @@ let SDK: NimSDK | null = null;
 let nimInstance: NimInstance | null = null;
 let nimInstancePromise: Promise<NimInstance> | null = null;
 let chatroomInstance: ChatroomInstance | null = null;
-let connectionState: ConnectionState = "disconnected";
-let chatRoomState: ChatRoomState = "none";
 let chatroomConnected = false;
 let intentionalChatroomDisconnect = false;
 let currentChatroomId: string | null = null;
 let loginSessionId = 0;
 let nimAccount = "";
-let signalingChannel: NimSignalingChannel | null = null;
 
-let imEnterCallback: Callback | null = null;
 export let chatRoomMsgCallback: Callback | null = null;
 
 export const imState: { connected: boolean; chatRoomId: string | null } = {
@@ -84,28 +70,20 @@ async function getSDK(): Promise<NimSDK> {
 
 // ===== Helpers =====
 
-function setConnectionState(nextState: ConnectionState) {
-  connectionState = nextState;
+function setConnectionState(nextState: string) {
   imState.connected = nextState === "connected";
 }
 
-function setChatRoomState(nextState: ChatRoomState, chatRoomId: string | null) {
-  chatRoomState = nextState;
+function setChatRoomState(_nextState: string, chatRoomId: string | null) {
   imState.chatRoomId = chatRoomId;
   currentChatroomId = chatRoomId;
 }
 
 function resetIMState() {
-  setConnectionState("disconnected");
-  setChatRoomState("none", null);
+  imState.connected = false;
+  imState.chatRoomId = null;
 }
 
-function buildEnterResult(): YunxinPayload {
-  return {
-    code: 200,
-    chatRoomId: currentChatroomId,
-  };
-}
 
 function notifyMainChatroomConnected() {
   ipcRenderer.send(IPC.LT_CHATROOM_CONNECTED);
@@ -128,7 +106,6 @@ function destroyIMInstance() {
     nimInstance = null;
   }
   chatroomConnected = false;
-  signalingChannel = null;
   nimAccount = "";
 }
 
@@ -359,43 +336,6 @@ export function dispatchChatRoomMsg(msg: YunxinPayload) {
   chatRoomMsgCallback(msg);
 }
 
-// ===== Signaling Management =====
-
-async function createSignalingChannel(
-  nim: NimInstance,
-  channelName: string,
-  roomId: string
-): Promise<void> {
-  if (signalingChannel && signalingChannel.channelName === channelName) {
-    console.log("[YunxinIM] signaling channel already exists:", channelName);
-    return;
-  }
-
-  try {
-    const channel = await nim.signalingCreateAndJoin({
-      type: 3,
-      channelName,
-      ext: JSON.stringify({ source: "open-orpheus", roomId }),
-      attachExt: JSON.stringify({ source: "open-orpheus", roomId }),
-      offlineEnabled: false,
-    }).catch((err: unknown) => {
-      console.warn("[YunxinIM] signalingCreateAndJoin failed, trying get/join:", err);
-      return nim.signalingGetChannelInfo({ channelName }).then((info) => {
-        if (!info || !info.channelId) throw err;
-        return nim.signalingJoin({
-          channelId: info.channelId,
-          offlineEnabled: false,
-        });
-      });
-    });
-
-    signalingChannel = channel;
-    console.log("[YunxinIM] signaling channel ready:", (channel as NimSignalingChannel).channelId, channelName);
-  } catch (e) {
-    console.warn("[YunxinIM] signaling setup failed, continuing without signaling:", e);
-  }
-}
-
 // ===== IPC Listeners (main -> preload) =====
 
 ipcRenderer.on(IPC.NIM_CLEANUP, () => {
@@ -576,10 +516,6 @@ async function doLoginIM(
     ipcRenderer.send(IPC.NIM_JOIN_CHATROOM, chatRoomId, userId || "");
 
     const result = { code: 200, chatRoomId };
-    if (imEnterCallback) {
-      console.log("[YunxinIM] firing subscribeYunXinIMEnter callback");
-      imEnterCallback(result);
-    }
     return result;
   } catch (e) {
     console.error("[YunxinIM] loginIM error:", e);
@@ -587,94 +523,5 @@ async function doLoginIM(
   }
 }
 
-// ===== ContextBridge API =====
 
-contextBridge.exposeInMainWorld("YunxinIM", {
-  get logged() {
-    return imState.connected;
-  },
 
-  loginIM: async (chatRoomId: string, userId?: string | number) => {
-    console.log("[YunxinIM] loginIM called, chatRoomId:", chatRoomId);
-    return performLoginIM(chatRoomId, userId ? String(userId) : undefined);
-  },
-
-  logout: () => {
-    console.log("[YunxinIM] logout called");
-    loginSessionId++;
-    destroyChatroomInstance();
-    ipcRenderer.send(IPC.NIM_LEAVE_CHATROOM);
-    resetIMState();
-    return Promise.resolve({ code: 200 });
-  },
-
-  enterRTC: async (params: YunxinPayload) => {
-    try {
-      const channelName = String(params.channelId ?? "");
-      const roomId = String(params.roomId ?? "");
-
-      const tokenResult = await ipcRenderer.invoke(
-        IPC.NIM_GET_LISTEN_TOGETHER_TOKEN,
-        channelName,
-        roomId
-      );
-
-      const tokenOk = (tokenResult as YunxinPayload)?.code === 200;
-
-      if (tokenOk) {
-        ipcRenderer.invoke(IPC.NIM_ENTER_RTC, params).catch((e) => {
-          console.warn("[YunxinIM] enterRTC main signaling failed:", e);
-        });
-      } else {
-        console.warn("[YunxinIM] enterRTC: token failed, skipping main RTC setup");
-      }
-
-      if (nimInstance && channelName) {
-        createSignalingChannel(nimInstance, channelName, roomId).catch((e) => {
-          console.warn("[YunxinIM] signaling create failed:", e);
-        });
-      }
-
-      return {
-        code: 200,
-        ...(tokenResult as YunxinPayload),
-        data: {
-          ...((tokenResult as YunxinPayload)?.data as YunxinPayload ?? {}),
-          roomId: params.roomId ?? "",
-          channelId: params.channelId ?? "",
-          roomRTCType: params.roomRTCType ?? "yunxin",
-        },
-      };
-    } catch (e) {
-      console.warn("[YunxinIM] enterRTC failed:", e);
-      return { code: -1, message: String(e) };
-    }
-  },
-
-  leaveRTC: () => {
-    console.log("[YunxinIM] leaveRTC called");
-    return Promise.resolve({ code: 200 });
-  },
-
-  leaveIM: () => {
-    console.log("[YunxinIM] leaveIM called");
-    loginSessionId++;
-    destroyChatroomInstance();
-    ipcRenderer.send(IPC.NIM_LEAVE_CHATROOM);
-    setChatRoomState("none", null);
-    return Promise.resolve({ code: 200 });
-  },
-
-  subscribeYunXinIMEnter: (callback: Callback) => {
-    console.log("[YunxinIM] subscribeYunXinIMEnter registered");
-    imEnterCallback = callback;
-    if (connectionState === "connected" && chatRoomState === "entered") {
-      callback(buildEnterResult());
-    }
-  },
-
-  subscribeYunXinIMChatRoomMsg: (callback: Callback) => {
-    console.log("[YunxinIM] subscribeYunXinIMChatRoomMsg registered");
-    chatRoomMsgCallback = callback;
-  },
-});
