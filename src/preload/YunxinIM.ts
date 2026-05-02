@@ -64,7 +64,6 @@ export default class YunxinIM {
         logLevel: "warn",
         onconnect(data) {
           resolve(data);
-          console.log("[YunxinIM] NIM connected:", account);
         },
         ondisconnect(data) {
           console.warn("[YunxinIM] NIM disconnected:", data);
@@ -141,11 +140,6 @@ export default class YunxinIM {
         logLevel: "warn",
         onconnect(data) {
           resolve(data);
-          console.log(
-            "[YunxinIM] chatroom connected:",
-            roomId,
-            data.connectionId
-          );
         },
         ondisconnect(data) {
           console.warn("[YunxinIM] chatroom disconnected:", data.code);
@@ -161,14 +155,6 @@ export default class YunxinIM {
         onmsgs(msgs) {
           for (const msg of msgs) {
             const eventMsg = msg.content;
-            console.log(
-              "[LT:RECV] nim.msg from:",
-              msg.from,
-              "type:",
-              msg.type,
-              "msg:",
-              msg.content
-            );
             // TODO: We might want to decouple this later
             fireNativeCall("im.onChatRoomMsg", { msg: eventMsg });
           }

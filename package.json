@@ -44,7 +44,6 @@
     "@types/audioworklet": "^0.0.97",
     "@types/electron-squirrel-startup": "^1.0.2",
     "@types/unzipper": "^0.10.11",
-    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.59.0",
     "@typescript-eslint/parser": "^8.59.0",
     "@yxim/nim-web-sdk": "^9.21.12",
