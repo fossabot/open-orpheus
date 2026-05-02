@@ -207,7 +207,7 @@ app.on("ready", async () => {
 
     await Promise.all([
       import("./main/channel"),
-      import("./main/nim"),
+      // Make sure we handle KV storage IPC calls
       import("./main/kv"),
       prepareDeviceId(),
       packManager.getPack<WebPack>("web").readPack(),
