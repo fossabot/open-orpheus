@@ -1,7 +1,7 @@
 import { app } from "electron";
 import semver from "semver";
 
-type UpdateInfo = {
+export type UpdateInfo = {
   version: string;
   releaseNote: string;
   url: string;
