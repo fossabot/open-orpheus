@@ -219,6 +219,7 @@ app.on("ready", async () => {
 
     await Promise.all([
       import("./main/channel"),
+      import("./main/request").then((m) => m.setupRequestInterceptors()),
       // Make sure we handle KV storage IPC calls
       import("./main/kv"),
       prepareDeviceId(),
