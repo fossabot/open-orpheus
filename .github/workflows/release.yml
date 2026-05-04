@@ -225,3 +225,8 @@ jobs:
           gh release edit "v${{ inputs.version }}" \
             --draft=false \
             ${{ inputs.pre_release && '--prerelease' || '' }}
+
+      - name: Trigger Flathub publish workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run flathub.yml --ref main
