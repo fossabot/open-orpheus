@@ -59,6 +59,12 @@
   </screenshots>
 
   <releases>
+    <release version="0.10.1" date="2026-05-04">
+      <description>
+        <p>Fixes Cookie management.</p>
+        <p xml:lang="zh-CN">修复 Cookie 管理。</p>
+      </description>
+    </release>
     <release version="0.10.0" date="2026-05-04">
       <description>
         <p>Custom skin support; fix multiple request issues; update resource package to 3.1.32.</p>
