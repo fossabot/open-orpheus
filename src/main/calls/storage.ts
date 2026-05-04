@@ -517,7 +517,7 @@ type AddId3Request = {
   media_rel_path: string;
   talb: string; // Track album
   tit2: string; // Track title
-  tpe1: string; // Track artists
+  tpe1: string | string[]; // Track artists, an array if podcast
   tpos: string; // Disc number
   trck: string; // Track pos
 };
@@ -539,7 +539,10 @@ registerCallHandler<[string, string, string, string, AddId3Request], void>(
 
       tagger.album = id3Info.talb;
       tagger.title = id3Info.tit2;
-      tagger.artist = id3Info.tpe1;
+      tagger.artist =
+        typeof id3Info.tpe1 === "string"
+          ? id3Info.tpe1
+          : id3Info.tpe1.join(",");
       tagger.discNumber = parseInt(id3Info.tpos) || 0;
       tagger.trackNumber = parseInt(id3Info.trck) || 0;
 
@@ -561,7 +564,9 @@ registerCallHandler<[string, string, string, string, AddId3Request], void>(
         relPath = relPath.slice(0, -4) + originalExt;
       }
 
-      tagger.save(normalizePath(download, relPath));
+      const finalPath = normalizePath(download, relPath);
+      await mkdir(dirname(finalPath), { recursive: true });
+      tagger.save(finalPath);
 
       tagger.dispose();
 
