@@ -1,8 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { dispatcher } from "./calls";
 
-import "./calls/index";
-
 const CALL_DEBUG = true; // Set to true to enable debug logs for channel.call
 let _callDebugId = 0;
 

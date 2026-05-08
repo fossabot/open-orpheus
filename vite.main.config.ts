@@ -1,3 +1,6 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { defineConfig } from "vite";
 
 // unzipper has a dependency on @aws-sdk/client-s3, which is not needed in
@@ -20,6 +23,11 @@ function NoS3Plugin() {
 
 // https://vitejs.dev/config
 export default defineConfig({
+  resolve: {
+    alias: {
+      "$sharedTypes": path.resolve(fileURLToPath(import.meta.url), "types"),
+    },
+  },
   build: {
     rollupOptions: {
       external: [

@@ -1,18 +1,10 @@
-import type { MenuSkin } from "../../main/menu/types";
-import type { ElementTemplate } from "../../main/skin/dui";
+import type { MenuSkin, MenuPullResult } from "$sharedTypes/menu";
+import type { ElementTemplate, LayoutNode, BtnImages, BtnState } from "$sharedTypes/dui";
 
-export type { MenuSkin } from "../../main/menu/types";
-export type { ElementTemplate, LayoutNode } from "../../main/skin/dui";
-
-export type { BtnImages, BtnState } from "../../../types/dui";
-
-export interface MenuPullResult {
-  items: unknown[];
-  templates: Record<string, ElementTemplate>;
-  colors: MenuSkin;
-  cursorX?: number;
-  cursorY?: number;
-}
+export type { MenuSkin };
+export type { ElementTemplate, LayoutNode };
+export type { BtnImages, BtnState };
+export type { MenuPullResult };
 
 export interface MenuContract {
   wayland: boolean;

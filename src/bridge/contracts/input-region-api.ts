@@ -1,9 +1,6 @@
-export interface InputRegion {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
+import type { InputRegion } from "$sharedTypes/input-region";
+
+export type { InputRegion };
 
 export interface InputRegionContract {
   platform: NodeJS.Platform;

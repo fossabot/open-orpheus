@@ -35,11 +35,3 @@ export interface LyricStyleConfig {
   offset: number;
   slogan: string;
 }
-
-export interface MenuSkin {
-  background: string;
-  foreground: string;
-  foregroundDisabled: string;
-  separator: string;
-  itemHover: string;
-}

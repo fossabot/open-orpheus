@@ -6,3 +6,4 @@ import "./audioplayer";
 import "./audioeffect";
 import "./player";
 import "./im";
+import "./nimsys";

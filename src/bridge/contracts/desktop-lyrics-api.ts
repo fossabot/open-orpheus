@@ -1,4 +1,4 @@
-import type { LyricsData, LyricStyleConfig } from "../../../gui/src/lib/types";
+import type { LyricsData, LyricStyleConfig } from "$sharedTypes/lyrics";
 
 export interface DesktopLyricsContract {
   events: {

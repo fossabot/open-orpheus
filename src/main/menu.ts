@@ -7,7 +7,7 @@ import {
 } from "@open-orpheus/window";
 
 import { menuSkin, registerMenuSkinUpdater } from "./menu/skin";
-import type { AppMenuItem, MenuClickHandler } from "./menu/types";
+import type { MenuClickHandler } from "./menu/types";
 import { patchById } from "./menu/types";
 import {
   createMenuWindow,
@@ -24,6 +24,8 @@ import type { MenuContract } from "../bridge/contracts/menu-api";
 import { parseBtnUrl, parseElementTemplate } from "./skin/dui";
 import type { ElementTemplate } from "./skin/dui";
 
+import type { AppMenuItem } from "$sharedTypes/menu";
+
 registerMenuSkinUpdater();
 
 const WAYLAND_CURSOR_CAPTURE_DEADLINE_MS = 200;
@@ -39,8 +41,6 @@ function parseButtonUrls(items: AppMenuItem[]) {
     if (item.children) parseButtonUrls(item.children);
   }
 }
-
-export type { AppMenuItem, AppMenuItemBtn, MenuSkin } from "./menu/types";
 
 export default class AppMenu extends EventTarget {
   private onClick: MenuClickHandler | null = null;

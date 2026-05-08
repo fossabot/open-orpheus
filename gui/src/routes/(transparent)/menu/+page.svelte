@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import type { MenuSkin } from "$lib/types";
+  import type { MenuSkin } from "$sharedTypes/menu";
   import type { MenuItem, MenuItemBtn } from "./types";
   import type { ElementTemplate } from "$bridge/contracts/menu-api";
   import { loadTemplates } from "./template";

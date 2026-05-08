@@ -1,24 +1,7 @@
 import { DOMParser, type Element } from "@xmldom/xmldom";
-import { BtnImages, BtnState } from "../../../types/dui";
+import type { BtnImages, BtnState, ElementTemplate, LayoutNode } from "$sharedTypes/dui";
 
-export type LayoutNode =
-  | { type: "horizontal"; children: LayoutNode[] }
-  | { type: "vertical"; children: LayoutNode[] }
-  | {
-      type: "container";
-      width?: number;
-      height?: number;
-      children: LayoutNode[];
-    }
-  | { type: "control"; width?: number; height?: number }
-  | { type: "button"; width: number; height: number; index: number };
-
-export interface ElementTemplate {
-  height: number;
-  minWidth: number;
-  maxWidth: number;
-  layout: LayoutNode;
-}
+export type { ElementTemplate, LayoutNode };
 
 function parseNum(el: Element, attr: string): number | undefined {
   const v = el.getAttribute(attr);

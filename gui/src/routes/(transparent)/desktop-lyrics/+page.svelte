@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Lyrics from "$lib/components/Lyrics.svelte";
-  import type { LyricsData, LyricStyleConfig } from "$lib/types";
+  import type { LyricsData, LyricStyleConfig } from "$sharedTypes/lyrics";
   import IconButton from "$lib/components/IconButton.svelte";
   import { cn } from "$lib/utils";
   import { getBridge } from "$lib/bridge";

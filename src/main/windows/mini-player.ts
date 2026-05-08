@@ -81,10 +81,11 @@ const defaultStyle: MiniPlayerStyle = {
 let style: MiniPlayerStyle = defaultStyle;
 
 packManager.addEventListener("skin2packloaded", async () => {
+  return;
   const skinPack = packManager.getPack<SkinPack>("skin2");
   const [
     bg,
-    //listBg,
+    listBg,
     listItemBg,
     listHoverBg,
     listSelectedBg,
@@ -103,15 +104,19 @@ packManager.addEventListener("skin2packloaded", async () => {
   );
   const [
     bgColor,
-    //listBgColor, // TODO: photon is unhappy with dark skin's bk.png
+    listBgColor,
     listItemBgColor,
     listHoverBgColor,
     listSelectedBgColor,
     listPlayingBgColor,
   ] = await Promise.all(
-    [bg, /* listBg,  */ listItemBg, listHoverBg, listSelectedBg, listPlayingBg]
-      .map((buf) => photon.PhotonImage.new_from_byteslice(buf))
-      .map(extractColor)
+    [bg, listBg, listItemBg, listHoverBg, listSelectedBg, listPlayingBg]
+      .map((buf) => {
+        const img = photon.PhotonImage.new_from_byteslice(buf);
+        const clr = extractColor(img);
+        img.free();
+        return clr;
+      })
   );
 
   const xml = skinBuf.toString("utf-8");
@@ -121,8 +126,7 @@ packManager.addEventListener("skin2packloaded", async () => {
 
   style.background = bgColor;
   style.list = {
-    //background: listBgColor,
-    background: "white",
+    background: listBgColor,
     itemBackground: listItemBgColor,
     hoverBackground: listHoverBgColor,
     selectedBackground: listSelectedBgColor,
