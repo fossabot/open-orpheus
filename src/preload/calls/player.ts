@@ -171,19 +171,6 @@ registerCallHandler<[string, number], [boolean]>("player.setFont", () => {
   return [true];
 });
 
-registerCallHandler<
-  [
-    {
-      status: string;
-      self: { avatarUrl: string };
-      other: { avatarUrl: string };
-    },
-  ],
-  [boolean]
->("player.setMiniTogetherStatus", () => {
-  return [true];
-});
-
 player.addEventListener("load", () => {
   if (!currentMetadata) return;
   // Ensure media session update

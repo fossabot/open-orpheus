@@ -22,6 +22,7 @@ import type {
   MiniPlayerListElement,
   MiniPlayerFullState,
   MiniPlayerStyle,
+  MiniPlayerTogetherStatus,
 } from "$sharedTypes/mini-player";
 
 let miniPlayerWindow: BrowserWindow | null = null;
@@ -34,6 +35,11 @@ let favour = false;
 let currentPlay: string | null = null;
 let playState: MiniPlayerPlayState = { playing: false };
 let listItems: MiniPlayerListElement[] = [];
+let togetherStatus: MiniPlayerTogetherStatus = {
+  status: "alone",
+  self: { avatarUrl: "" },
+  other: { avatarUrl: "" },
+};
 
 function btn(icon: string, color = "#333333", ext = "svg"): BtnImages {
   return {
@@ -366,6 +372,11 @@ export function updateListData(
   sendToMiniPlayer("listUpdate", { items, currentPlay });
 }
 
+export function updateTogetherStatus(status: MiniPlayerTogetherStatus) {
+  togetherStatus = status;
+  sendToMiniPlayer("togetherStatusUpdate", status);
+}
+
 export function showVolume(volume: number, muted: boolean) {
   sendToMiniPlayer("showVolume", [volume, muted]);
 }
@@ -384,6 +395,7 @@ export function getFullState(): MiniPlayerFullState {
     currentPlay,
     playState,
     listItems,
+    togetherStatus,
     style,
   };
 }

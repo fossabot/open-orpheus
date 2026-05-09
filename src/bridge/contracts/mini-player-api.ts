@@ -6,6 +6,7 @@ import type {
   MiniPlayerStyle,
   MiniPlayerShowVolumeRequest,
   MiniPlayerLikeMark,
+  MiniPlayerTogetherStatus,
 } from "$sharedTypes/mini-player";
 
 export interface MiniPlayerContract {
@@ -17,6 +18,9 @@ export interface MiniPlayerContract {
     favourUpdate(callback: (favourited: boolean) => void): void;
     playStateUpdate(callback: (state: MiniPlayerPlayState) => void): void;
     listUpdate(callback: (data: MiniPlayerListData) => void): void;
+    togetherStatusUpdate(
+      callback: (status: MiniPlayerTogetherStatus) => void
+    ): void;
     showVolume(callback: (data: MiniPlayerShowVolumeRequest) => void): void;
     styleUpdate(callback: (style: MiniPlayerStyle | null) => void): void;
   };

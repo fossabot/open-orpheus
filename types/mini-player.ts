@@ -38,6 +38,16 @@ export interface MiniPlayerListData {
   currentPlay: string | null;
 }
 
+export interface MiniPlayerTogetherUser {
+  avatarUrl: string;
+}
+
+export interface MiniPlayerTogetherStatus {
+  status: "alone" | "waiting" | "togetherOwner" | "together";
+  self: MiniPlayerTogetherUser;
+  other: MiniPlayerTogetherUser;
+}
+
 export interface MiniPlayerFullState {
   playInfo: MiniPlayerPlayInfo | null;
   coverUrl: string | null;
@@ -46,6 +56,7 @@ export interface MiniPlayerFullState {
   currentPlay: string | null;
   playState: MiniPlayerPlayState;
   listItems: MiniPlayerListElement[];
+  togetherStatus: MiniPlayerTogetherStatus;
   style: MiniPlayerStyle | null;
 }
 

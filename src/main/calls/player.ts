@@ -1,4 +1,7 @@
-import { MiniPlayerLikeMark } from "$sharedTypes/mini-player";
+import {
+  MiniPlayerLikeMark,
+  MiniPlayerTogetherStatus,
+} from "$sharedTypes/mini-player";
 import { registerCallHandler } from "../calls";
 import {
   updatePlayInfo,
@@ -8,6 +11,7 @@ import {
   updateListData,
   showVolume,
   updateFavour,
+  updateTogetherStatus,
 } from "../windows/mini-player";
 
 let listItems: ListElement[] = [];
@@ -107,6 +111,14 @@ registerCallHandler<
   updatePlayState(state.playstate !== 1);
   return [true];
 });
+
+registerCallHandler<[MiniPlayerTogetherStatus], [boolean]>(
+  "player.setMiniTogetherStatus",
+  (event, status) => {
+    updateTogetherStatus(status);
+    return [true];
+  }
+);
 
 registerCallHandler<[number, boolean], [boolean]>(
   "player.showVolume",

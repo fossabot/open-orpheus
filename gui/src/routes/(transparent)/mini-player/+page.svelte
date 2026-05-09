@@ -18,6 +18,7 @@
     MiniPlayerPlayState,
     MiniPlayerListData,
     MiniPlayerStyle,
+    MiniPlayerTogetherStatus,
   } from "$sharedTypes/mini-player";
 
   const api = getBridge<MiniPlayerContract>("miniPlayer");
@@ -28,6 +29,11 @@
   let favour = $state(false);
   let playState = $state<MiniPlayerPlayState>({ playing: false });
   let listData = $state<MiniPlayerListData>({ items: [], currentPlay: null });
+  let togetherStatus = $state<MiniPlayerTogetherStatus>({
+    status: "alone",
+    self: { avatarUrl: "" },
+    other: { avatarUrl: "" },
+  });
   let style = $state<MiniPlayerStyle | null>(null);
 
   function applyFullState(state: MiniPlayerFullState) {
@@ -37,6 +43,7 @@
     favour = state.favour;
     playState = state.playState;
     listData = { items: state.listItems, currentPlay: state.currentPlay };
+    togetherStatus = state.togetherStatus;
     style = state.style;
   }
 
@@ -58,6 +65,9 @@
     });
     api.events.listUpdate((data) => {
       listData = data;
+    });
+    api.events.togetherStatusUpdate((status) => {
+      togetherStatus = status;
     });
     api.events.showVolume((data) => {
       volume = data[0] * 100;
@@ -123,15 +133,46 @@
   }}
   {@attach inputRegionAttachment}
 >
-  {#if coverUrl}
-    <button
-      class="cursor-pointer"
-      onmousedown={noPropagation}
-      onclick={() => api.fireCall("player.onrequestchangetomain", "")}
-    >
-      <img src={coverUrl} alt="Cover" class="size-12.5" />
-    </button>
-  {/if}
+  <button
+    class="cursor-pointer"
+    onmousedown={noPropagation}
+    onclick={() => api.fireCall("player.onrequestchangetomain", "")}
+  >
+    {#if togetherStatus.status === "alone"}
+      {#if coverUrl}
+        <img src={coverUrl} alt="Cover" class="size-12.5" />
+      {/if}
+    {:else}
+      <div class="flex px-2">
+        <div class="size-8 overflow-hidden rounded-full">
+          <img src={togetherStatus.self.avatarUrl} alt="Self" />
+        </div>
+        <div
+          class="size-8 overflow-hidden rounded-full {togetherStatus.status ===
+          'waiting'
+            ? 'relative ml-1'
+            : '-ml-1'}"
+        >
+          {#if togetherStatus.status === "waiting"}
+            <div
+              class="absolute top-0 right-0 bottom-0 left-0 flex items-center justify-center bg-black/50"
+            >
+              <img
+                class="w-6"
+                src="gui://skin2/mini/together/loading.webp"
+                alt="Waiting"
+              />
+            </div>
+          {/if}
+          <img
+            src={togetherStatus.other.avatarUrl ||
+              "gui://skin2/mini/together/default.png"}
+            alt="Other"
+          />
+        </div>
+      </div>
+    {/if}
+  </button>
   <div class="group relative flex flex-1 items-center justify-center gap-2">
     {#if playInfo}
       <div
@@ -271,7 +312,9 @@
           {:else}
             <div class="flex size-4 items-center justify-center"></div>
           {/if}
-          <p class="flex-1 overflow-hidden whitespace-nowrap text-ellipsis">{item.title}</p>
+          <p class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
+            {item.title}
+          </p>
           {#if item.program === 1}
             <IconButton
               class="group-hover/list-item:hidden"
