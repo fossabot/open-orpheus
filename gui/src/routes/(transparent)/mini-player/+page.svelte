@@ -274,6 +274,11 @@
           <p>{item.title}</p>
         </li>
       {/each}
+      {#if listData.items.length < 10}
+        {#each { length: 10 - listData.items.length }, i (i)}
+          <li class="h-8.5 even:bg-(--item-bg) hover:bg-(--hover-bg)"></li>
+        {/each}
+      {/if}
     </ul>
   {/if}
 </div>
