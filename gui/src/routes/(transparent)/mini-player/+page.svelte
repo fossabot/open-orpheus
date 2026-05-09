@@ -199,7 +199,7 @@
   <IconButton
     bind:element={volumeButtonEl}
     class="size-6 cursor-pointer"
-    imgClass="size-full"
+    imgClass="size-full mt-px"
     images={style?.volumeButton}
     onmousedown={noPropagation}
     onclick={() =>
@@ -209,7 +209,7 @@
   />
   <IconButton
     class="size-4 cursor-pointer"
-    imgClass="size-full"
+    imgClass="size-full mt-0.5"
     images={style?.listButton}
     onmousedown={noPropagation}
     onclick={() => (showList = !showList)}
@@ -254,24 +254,34 @@
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <li
           tabindex="0"
-          class="flex h-8.5 items-center select-none even:bg-(--item-bg) hover:bg-(--hover-bg) focus:bg-(--selected-bg){item.id ===
+          class="flex h-8.5 items-center gap-2 px-2 select-none even:bg-(--item-bg) hover:bg-(--hover-bg) focus:bg-(--selected-bg){item.id ===
           listData.currentPlay
             ? ' bg-(--playing-bg)!'
-            : ''} hover:text-(--hover-color) focus:text-(--selected-color)"
+            : ''} group/list-item hover:text-(--hover-color) focus:text-(--selected-color)"
           ondblclick={() => api.fireCall("player.onrequestplay", item.id)}
           oncontextmenu={() => api.fireCall("player.onmenu", item.id)}
         >
-          <div class="flex size-6 items-center justify-center">
-            {#if item.id === listData.currentPlay}
-              <IconButton
-                images={playState.playing
-                  ? style?.list.playButton
-                  : style?.list.pauseButton}
-                imgClass="size-4"
-              />
-            {/if}
-          </div>
-          <p>{item.title}</p>
+          {#if item.id === listData.currentPlay}
+            <IconButton
+              images={playState.playing
+                ? style?.list.playButton
+                : style?.list.pauseButton}
+              imgClass="size-4"
+            />
+          {:else}
+            <div class="flex size-4 items-center justify-center"></div>
+          {/if}
+          <p class="flex-1">{item.title}</p>
+          {#if item.program === 1}
+            <IconButton
+              class="group-hover/list-item:hidden"
+              images={style?.list.radioIcon}
+            />
+            <IconButton
+              class="hidden group-hover/list-item:block"
+              images={style?.list.radioHoverIcon}
+            />
+          {/if}
         </li>
       {/each}
       {#if listData.items.length < 10}

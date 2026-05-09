@@ -25,7 +25,7 @@ export interface MiniPlayerListElement {
   from: string;
   title: string;
   track_id: string;
-  program: null;
+  program: null | 1;
   mv: string;
   album: string;
   artist: string;
@@ -82,12 +82,15 @@ export interface MiniPlayerStyle {
     playingBackground: string;
     scrollBar: string;
 
-    playButton: BtnImages;
-    pauseButton: BtnImages;
-
     color: string;
     hoverColor: string;
     selectedColor: string;
+
+    playButton: BtnImages;
+    pauseButton: BtnImages;
+
+    radioIcon: BtnImages;
+    radioHoverIcon: BtnImages;
   };
 }
 

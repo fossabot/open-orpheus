@@ -35,11 +35,11 @@ let currentPlay: string | null = null;
 let playState: MiniPlayerPlayState = { playing: false };
 let listItems: MiniPlayerListElement[] = [];
 
-function btn(icon: string, color = "#333333"): BtnImages {
+function btn(icon: string, color = "#333333", ext = "svg"): BtnImages {
   return {
-    normal: { uri: `gui://skin/btn/${icon}.svg`, color },
-    hot: { uri: `gui://skin/btn/${icon}.svg`, color },
-    pushed: { uri: `gui://skin/btn/${icon}.svg`, color },
+    normal: { uri: `gui://skin/btn/${icon}.${ext}`, color },
+    hot: { uri: `gui://skin/btn/${icon}.${ext}`, color },
+    pushed: { uri: `gui://skin/btn/${icon}.${ext}`, color },
   };
 }
 
@@ -84,6 +84,8 @@ const defaultStyle: MiniPlayerStyle = {
     scrollBar: "rgba(0,0,0,0.1)",
     playButton: btn("listplaying"),
     pauseButton: btn("listpause"),
+    radioIcon: btn("radio_nl", undefined, "png"),
+    radioHoverIcon: btn("radio_hl", undefined, "png"),
     color: "#000000",
     hoverColor: "#333333",
     selectedColor: "#333333",
@@ -297,14 +299,26 @@ packManager.addEventListener("skin2packloaded", async () => {
   btnsFound = 0;
   for (const btn of listBtns) {
     const name = btn.getAttribute("name");
-    if (name === "list_play") {
-      listStyle.playButton = extractBtnImagesFromElement(btn) ?? undefined;
-      btnsFound++;
-    } else if (name === "list_pause") {
-      listStyle.pauseButton = extractBtnImagesFromElement(btn) ?? undefined;
-      btnsFound++;
+    btnsFound++; // Simpler casing
+    switch (name) {
+      case "list_play":
+        listStyle.playButton = extractBtnImagesFromElement(btn) ?? undefined;
+        break;
+      case "list_pause":
+        listStyle.pauseButton = extractBtnImagesFromElement(btn) ?? undefined;
+        break;
+      case "dj_info":
+        listStyle.radioIcon = extractBtnImagesFromElement(btn) ?? undefined;
+        break;
+      case "dj_highlight":
+        listStyle.radioHoverIcon =
+          extractBtnImagesFromElement(btn) ?? undefined;
+        break;
+      default:
+        btnsFound--;
+        break;
     }
-    if (btnsFound >= 2) break;
+    if (btnsFound >= 4) break;
   }
 
   style.list = listStyle as MiniPlayerStyle["list"];
