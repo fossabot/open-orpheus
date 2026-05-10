@@ -4,10 +4,11 @@ import { DatabaseSync } from "node:sqlite";
 import { Database } from "@open-orpheus/database";
 import { data } from "./folders";
 
+export const NATIVE_KV_TABLE = "kv_store";
+
 const pathToWebDb = join(data, "webdb.dat");
 const pathToMusicLibrary = join(data, "library.dat");
 const pathToNativeDb = join(data, "openorpheus.db");
-export const NATIVE_KV_TABLE = "kv_store";
 
 let webDb: Database;
 let musicLibraryDb: Database;

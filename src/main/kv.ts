@@ -2,6 +2,13 @@ import { ipcMain } from "electron";
 
 import { getNativeDb as db, NATIVE_KV_TABLE } from "./database";
 
+// Known KV entries, undefined refers to no default value
+export const kvEntries: Record<string, string | Uint8Array | undefined> = {
+  "tray.clickBehavior": "always-show-menu",
+  "window.overrideMainWindowSizeLimit": undefined,
+  proxy: undefined,
+};
+
 const eventTarget = new EventTarget();
 export const addEventListener = eventTarget.addEventListener.bind(eventTarget);
 export const removeEventListener =
@@ -113,6 +120,8 @@ export function kvGet(key: string): KvValue | null {
     .prepare(`SELECT value FROM ${NATIVE_KV_TABLE} WHERE key = ? LIMIT 1`)
     .get(key) as { value: KvValue } | undefined;
   if (!row) {
+    const defaultValue = kvEntries[key];
+    if (defaultValue !== undefined) return defaultValue;
     return null;
   }
 
