@@ -62,6 +62,17 @@
   </screenshots>
 
   <releases>
+    <release version="0.11.2" date="2026-05-10">
+      <url type="details">https://github.com/YUCLing/open-orpheus/releases/tag/v0.11.2</url>
+      <description>
+        <ul>
+          <li>Fix connection error when using HTTP proxy.</li>
+          <li xml:lang="zh-CN">修复连接HTTP代理出错。</li>
+          <li>Mini player now displays default cover when no music is loaded.</li>
+          <li xml:lang="zh-CN">mini 播放器无音乐时没有显示默认封面（已修复）。</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.11.1" date="2026-05-10">
       <url type="details">https://github.com/YUCLing/open-orpheus/releases/tag/v0.11.1</url>
       <description>
