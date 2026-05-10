@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { dispatcher } from "./calls";
 
-const CALL_DEBUG = true; // Set to true to enable debug logs for channel.call
+const CALL_DEBUG = false; // Set to true to enable debug logs for channel.call
 let _callDebugId = 0;
 
 const nativeCallbacks = new Map<string, (...args: unknown[]) => void>();
