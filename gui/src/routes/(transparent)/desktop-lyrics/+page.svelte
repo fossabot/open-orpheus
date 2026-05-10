@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import Lyrics from "$lib/components/Lyrics.svelte";
-  import type { LyricsData, LyricStyleConfig } from "$lib/types";
+  import type { LyricsData, LyricStyleConfig } from "$sharedTypes/lyrics";
   import IconButton from "$lib/components/IconButton.svelte";
   import { cn } from "$lib/utils";
   import { getBridge } from "$lib/bridge";
   import type { DesktopLyricsContract } from "$bridge/contracts/desktop-lyrics-api";
+  import { inputRegionAttachment } from "$lib/inputRegion";
 
   const api = getBridge<DesktopLyricsContract>("desktopLyrics");
 
@@ -15,33 +16,6 @@
   let locked = $state(false);
   let unlockButton: HTMLButtonElement | null = $state(null);
   let rootEl: HTMLDivElement | null = $state(null);
-
-  function updateUnlockInputRegion() {
-    if (!unlockButton) {
-      api.setInputRegion(0, 0, 0, 0);
-      return;
-    }
-    const r = unlockButton.getBoundingClientRect();
-    api.setInputRegion(r.x, r.y, r.width, r.height);
-  }
-
-  $effect(() => {
-    const btn = unlockButton;
-    const root = rootEl;
-    if (locked && btn && root) {
-      updateUnlockInputRegion();
-
-      const observer = new ResizeObserver(() => updateUnlockInputRegion());
-      observer.observe(root);
-      observer.observe(btn);
-      return () => {
-        observer.disconnect();
-        api.setInputRegion(0, 0, 0, 0);
-      };
-    } else {
-      api.setInputRegion(0, 0, 0, 0);
-    }
-  });
 
   const items: ([string, string, string] | [string, string, string, true])[] =
     $derived([
@@ -178,12 +152,8 @@
         bind:this={unlockButton}
         class="size-12 cursor-pointer"
         onclick={() => api.performAction("unlock")}
-        // On Windows/macOS, we use Electron's `setIgnoreMouseEvent`, so we need to take input back
-        onmouseenter={() =>
-          api.platform !== "linux" && api.setInputRegion(0, 0, 0, 0)}
-        onmouseleave={() =>
-          api.platform !== "linux" && updateUnlockInputRegion()}
         title="解锁桌面歌词"
+        {@attach inputRegionAttachment}
         ><img
           src="gui://skin/lrc/desk_icn_unlock.png"
           alt="解锁桌面歌词"
@@ -195,7 +165,8 @@
           normal={`gui://skin/lrc/${icon}_normal.svg`}
           hover={`gui://skin/lrc/${icon}_over.svg`}
           active={`gui://skin/lrc/${icon}_push.svg`}
-          disabled={disabled ? `gui://skin/lrc/${icon}_dis.svg` : undefined}
+          disable={`gui://skin/lrc/${icon}_dis.svg`}
+          {disabled}
           onmousedown={(e) => {
             e.stopPropagation();
           }}

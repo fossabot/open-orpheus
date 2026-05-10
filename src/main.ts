@@ -149,6 +149,11 @@ const createWindow = () => {
     mainWindow.webContents.send("channel.call", "winhelper.onlosefocus");
   });
 
+  mainWindow.on("show", () => {
+    // Make sure mini player doesn't show together with main window
+    import("./main/windows/mini-player").then((m) => m.hideMiniPlayerWindow());
+  });
+
   mainWindow.on("close", (e) => {
     if (quitting) return;
     mainWindow.webContents.send("channel.call", "winhelper.onclose");
@@ -229,6 +234,10 @@ app.on("ready", async () => {
       packManager.getPack<WebPack>("web").readPack(),
       import("./main/windows/desktop-lyrics").then((m) => {
         // Create desktop lyrics window
+        m.default();
+      }),
+      import("./main/windows/mini-player").then((m) => {
+        // Create mini player window
         m.default();
       }),
     ]);

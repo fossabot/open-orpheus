@@ -1,14 +1,15 @@
-import type { MenuSkin } from "../../main/menu/types";
+import type { MenuSkin, MenuPullResult } from "$sharedTypes/menu";
+import type {
+  ElementTemplate,
+  LayoutNode,
+  BtnImages,
+  BtnState,
+} from "$sharedTypes/dui";
 
-export type { MenuSkin } from "../../main/menu/types";
-
-export interface MenuPullResult {
-  items: unknown[];
-  templates: Record<string, string>;
-  colors: MenuSkin;
-  cursorX?: number;
-  cursorY?: number;
-}
+export type { MenuSkin };
+export type { ElementTemplate, LayoutNode };
+export type { BtnImages, BtnState };
+export type { MenuPullResult };
 
 export interface MenuContract {
   wayland: boolean;
@@ -18,7 +19,7 @@ export interface MenuContract {
     show(
       callback: (
         items: unknown[],
-        templates: Record<string, string>,
+        templates: Record<string, ElementTemplate>,
         cursorX: number,
         cursorY: number,
         colors: MenuSkin
@@ -34,7 +35,7 @@ export interface MenuContract {
   close(): Promise<void>;
   openSubmenu(
     items: unknown[],
-    templates: Record<string, string>,
+    templates: Record<string, ElementTemplate>,
     x: number,
     y: number
   ): Promise<void>;

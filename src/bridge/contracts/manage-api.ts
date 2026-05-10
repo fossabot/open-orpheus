@@ -1,16 +1,7 @@
-import type { UpdateInfo } from "../../main/update";
+import type { UpdateInfo } from "$sharedTypes/update";
+import type { CacheGroupStats, AllCacheStats } from "$sharedTypes/manage";
 
-export interface CacheGroupStats {
-  entryCount: number;
-  sizeBytes: number;
-}
-
-export interface AllCacheStats {
-  play: CacheGroupStats;
-  http: CacheGroupStats;
-  lyrics: CacheGroupStats;
-  wasm: CacheGroupStats;
-}
+export type { CacheGroupStats, AllCacheStats };
 
 export interface ManageContract {
   platform: NodeJS.Platform;

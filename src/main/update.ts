@@ -1,12 +1,6 @@
 import { app } from "electron";
 import semver from "semver";
-
-export type UpdateInfo = {
-  version: string;
-  releaseNote: string;
-  url: string;
-  time: string;
-};
+import type { UpdateInfo } from "$sharedTypes/update";
 
 let cachedUpdateInfo: UpdateInfo | null | false = false;
 

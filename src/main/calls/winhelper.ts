@@ -2,6 +2,7 @@ import { BrowserWindow, clipboard, nativeImage } from "electron";
 import path from "node:path";
 import os from "node:os";
 
+import type { AppMenuItem } from "$sharedTypes/menu";
 import { dragWindow, isWayland } from "@open-orpheus/window";
 
 import { registerCallHandler } from "../calls";
@@ -14,7 +15,7 @@ import {
   setMaximumSize,
   setMinimumSize,
 } from "../window";
-import AppMenu, { AppMenuItem } from "../menu";
+import AppMenu from "../menu";
 import showManageWindow from "../windows/manage";
 import { registerGlobalShortcut, unregisterGlobalShortcut } from "../shortcuts";
 import {
