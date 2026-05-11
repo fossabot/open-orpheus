@@ -1,6 +1,8 @@
 import { exposeApi } from "../bridge/preload";
 
-exposeApi("desktopLyrics");
+exposeApi("desktopLyrics", {
+  platform: process.platform,
+});
 exposeApi("inputRegion", {
   platform: process.platform,
 });
