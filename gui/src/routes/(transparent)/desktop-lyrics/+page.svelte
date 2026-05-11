@@ -143,7 +143,9 @@
   onmousedown={onDrag}
 >
   <div
-    class="flex justify-center gap-2 group-hover:visible invisible{lyricStyle.vertical
+    class="flex justify-center gap-2 {api.platform === 'linux' && locked
+      ? 'opacity-25 group-hover:opacity-100'
+      : 'invisible group-hover:visible'}{lyricStyle.vertical
       ? ' flex-col'
       : ''}"
   >
