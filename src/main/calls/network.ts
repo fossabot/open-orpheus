@@ -6,6 +6,7 @@ import type { Method } from "got";
 import { registerCallHandler } from "../calls";
 import { deserialData } from "../crypto";
 import client from "../request";
+import interceptAnonymousRequest from "../anonymous";
 
 let globalFailCount = 0;
 let globalSucCount = 0;
@@ -37,6 +38,23 @@ registerCallHandler<[NetworkFetchRequest], [NetworkFetchResponse]>(
     const retryCount = request.retryCount ?? 1;
 
     try {
+      const anonymousRes = await interceptAnonymousRequest(request);
+      if (anonymousRes !== null) {
+        const [res, suc, fail] = anonymousRes;
+        globalSucCount += suc;
+        globalFailCount += fail;
+        if (res instanceof Error) throw res;
+        return [
+          {
+            code: 0,
+            error: "",
+            globalFailCount,
+            globalSucCount,
+            ...res,
+          },
+        ];
+      }
+
       const response = await client(request.url, {
         method: request.method,
         headers: {
