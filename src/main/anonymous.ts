@@ -1,3 +1,11 @@
+/*
+Our requests to /register/anonimous API are still problematic (server returns 400),
+this module is used to workaround it. Tho it's quite hacky, but it works, confirmed
+by our tests.
+We are still looking to solve the 400 issue properly.
+See https://github.com/YUCLing/open-orpheus/pull/75
+*/
+
 import { randomBytes } from "node:crypto";
 
 import type { NetworkFetchRequest } from "./calls/network";
