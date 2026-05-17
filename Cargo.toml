@@ -1,3 +1,7 @@
 [workspace]
-members = ["modules/database", "modules/window/crates/@open-orpheus/window", "modules/ui"]
+members = ["modules/database", "modules/window", "modules/ui"]
 resolver = "3"
+
+[profile.release]
+lto   = true
+strip = "symbols"
