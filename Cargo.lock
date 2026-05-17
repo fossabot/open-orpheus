@@ -965,7 +965,9 @@ name = "ui"
 version = "0.1.0"
 dependencies = [
  "font-kit",
- "neon",
+ "napi",
+ "napi-build",
+ "napi-derive",
 ]
 
 [[package]]
