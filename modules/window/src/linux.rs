@@ -121,7 +121,10 @@ pub fn set_input_region(
 #[napi]
 pub fn capture_next_window_first_cursor_enter(
     env: Env,
-    #[napi(ts_arg_type = "(x: number, y: number) => void")] callback: Function<FnArgs<(i32, i32)>, ()>,
+    #[napi(ts_arg_type = "(x: number, y: number) => void")] callback: Function<
+        FnArgs<(i32, i32)>,
+        (),
+    >,
 ) -> Result<()> {
     if disable_display_server_hooks() {
         return env.throw(
@@ -129,12 +132,20 @@ pub fn capture_next_window_first_cursor_enter(
         );
     }
 
-    let cb = callback.build_threadsafe_function()
-        .build_callback(|ctx: ThreadsafeCallContext<(u32, u32)>| Ok(std::convert::Into::<FnArgs<(u32, u32)>>::into(ctx.value)))?;
+    let cb = callback.build_threadsafe_function().build_callback(
+        |ctx: ThreadsafeCallContext<(u32, u32)>| {
+            Ok(std::convert::Into::<FnArgs<(u32, u32)>>::into(ctx.value))
+        },
+    )?;
 
     if !wayland::on_next_new_window_first_cursor_enter(move |x, y| {
-        if x < 0 || y < 0 { return; }
-        cb.call((x as u32, y as u32), ThreadsafeFunctionCallMode::NonBlocking);
+        if x < 0 || y < 0 {
+            return;
+        }
+        cb.call(
+            (x as u32, y as u32),
+            ThreadsafeFunctionCallMode::NonBlocking,
+        );
     }) {
         return env.throw("captureNextWindowFirstCursorEnter is unavailable because Wayland hooks are not initialized");
     }
