@@ -7,4 +7,4 @@ mod windows;
 pub mod linux;
 
 #[cfg(target_os = "macos")]
-mod macos;
+pub mod macos;

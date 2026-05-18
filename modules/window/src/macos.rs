@@ -1,10 +1,5 @@
-use neon::prelude::Context;
-use neon::{
-    handle::Handle,
-    prelude::Cx,
-    result::NeonResult,
-    types::{JsBuffer, buffer::TypedArray},
-};
+use napi::{Env, Result, bindgen_prelude::Buffer};
+use napi_derive::napi;
 use objc2::{class, msg_send, runtime::AnyObject, sel};
 use objc2_foundation::NSPoint;
 
@@ -27,33 +22,28 @@ unsafe fn create_drag_event(window: *mut AnyObject) -> *mut AnyObject {
     }
 }
 
-#[neon::export]
-fn drag_window<'cx>(cx: &mut Cx<'cx>, hwnd: Handle<JsBuffer>) -> NeonResult<()> {
-    let hwnd = hwnd.as_slice(cx);
+#[napi]
+pub fn drag_window(env: Env, hwnd: Buffer) -> Result<()> {
     if hwnd.len() < std::mem::size_of::<usize>() {
-        let err_msg = cx.string("Invalid buffer size for native handle");
-        return cx.throw(err_msg);
+        return env.throw("Invalid buffer size for native handle");
     }
 
     let mut bytes = [0u8; std::mem::size_of::<usize>()];
     bytes.copy_from_slice(&hwnd[..std::mem::size_of::<usize>()]);
     let view = usize::from_ne_bytes(bytes) as *mut AnyObject;
     if view.is_null() {
-        let err_msg = cx.string("Null native pointer");
-        return cx.throw(err_msg);
+        return env.throw("Null native pointer");
     }
 
     let window: *mut AnyObject = unsafe { msg_send![view, window] };
     if window.is_null() {
-        let err_msg = cx.string("Could not resolve NSWindow from NSView handle");
-        return cx.throw(err_msg);
+        return env.throw("Could not resolve NSWindow from NSView handle");
     }
 
     let can_drag: bool =
         unsafe { msg_send![window, respondsToSelector: sel!(performWindowDragWithEvent:)] };
     if !can_drag {
-        let err_msg = cx.string("performWindowDragWithEvent is unavailable on this system");
-        return cx.throw(err_msg);
+        return env.throw("performWindowDragWithEvent is unavailable on this system");
     }
 
     unsafe {
