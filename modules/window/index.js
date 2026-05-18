@@ -576,4 +576,9 @@ if (!nativeBinding) {
 }
 
 module.exports = nativeBinding
+module.exports.captureNextWindowFirstCursorEnter = nativeBinding.captureNextWindowFirstCursorEnter
+module.exports.DesktopEnvironment = nativeBinding.DesktopEnvironment
 module.exports.dragWindow = nativeBinding.dragWindow
+module.exports.getDesktopEnvironment = nativeBinding.getDesktopEnvironment
+module.exports.getLastCreatedWindowId = nativeBinding.getLastCreatedWindowId
+module.exports.setInputRegion = nativeBinding.setInputRegion

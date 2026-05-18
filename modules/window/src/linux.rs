@@ -33,17 +33,15 @@ pub struct Rect {
     pub h: i32,
 }
 
-#[napi]
 pub fn is_wayland() -> bool {
     wayland::is_wayland()
 }
 
-#[napi]
 pub fn is_x11() -> bool {
     x11::is_x11()
 }
 
-#[napi]
+// TODO: Drop this way to identify wl_surface
 pub fn get_last_created_window_id() -> Option<String> {
     wayland::get_last_created_window_id()
 }
@@ -72,13 +70,7 @@ pub fn drag_window(env: Env, handle: Buffer) -> Result<()> {
     Ok(())
 }
 
-#[napi]
-pub fn set_input_region(
-    #[napi(ts_arg_type = "string | Buffer")] window_handle: Unknown,
-    #[napi(ts_arg_type = "{ x: number, y: number, w: number, h: number }[] | null")] rects: Option<
-        Array,
-    >,
-) -> Result<bool> {
+pub fn set_input_region(window_handle: Unknown, rects: Option<Array>) -> Result<bool> {
     let mut parsed_rects = None;
     if let Some(arr) = rects {
         let mut r = Vec::with_capacity(arr.len() as usize);
@@ -118,13 +110,9 @@ pub fn set_input_region(
     Ok(false)
 }
 
-#[napi]
 pub fn capture_next_window_first_cursor_enter(
     env: Env,
-    #[napi(ts_arg_type = "(x: number, y: number) => void")] callback: Function<
-        FnArgs<(i32, i32)>,
-        (),
-    >,
+    callback: Function<FnArgs<(i32, i32)>, ()>,
 ) -> Result<()> {
     if disable_display_server_hooks() {
         return env.throw(
