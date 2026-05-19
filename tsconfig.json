@@ -15,6 +15,12 @@
       "$sharedTypes/*": ["./types/*"]
     }
   },
-  "include": ["src", "forge.env.d.ts"],
+  "include": [
+    "src",
+    "forge.env.d.ts",
+    "packaging/**/*.ts",
+    "scripts/*.mts",
+    "scripts/*.ts"
+  ],
   "exclude": ["gui"]
 }

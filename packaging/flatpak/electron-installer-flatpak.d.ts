@@ -48,10 +48,6 @@ declare module "@malept/electron-installer-flatpak" {
     class Installer extends ElectronInstaller {
       constructor(data: InstallerData);
 
-      get appIdentifier(): string;
-      get baseAppDir(): string;
-      get contentFunctions(): string[];
-      get defaultDesktopTemplatePath(): string;
       get flatpakrefs(): FlatpakRefs;
       get resourcesDir(): string;
 
